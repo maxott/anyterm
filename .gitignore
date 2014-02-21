@@ -2,3 +2,4 @@ build
 build.iphonesim
 *.o
 *.a
+.project

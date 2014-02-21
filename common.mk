@@ -39,7 +39,7 @@ endif
 
 LIBPBE_DIR=../libpbe
 
-CPP_FLAGS=
+CPP_FLAGS=-I../include
 
 GCC_FLAGS=-pthread
 #GCC_FLAGS=-D_REENTRANT
