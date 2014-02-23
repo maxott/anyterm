@@ -37,10 +37,10 @@ public:
   static const int default_max_sessions = 25;
 
   Daemon(short p,
-	 std::string pn,
-	 int sf = LOG_LOCAL0,
-	 std::string u="",
-	 std::string d="",
+   std::string pn,
+   int sf = LOG_LOCAL0,
+   std::string u="",
+   std::string d="",
          int max_sessions_=0,
          bool accept_local_only_=false);
   virtual ~Daemon();
@@ -51,6 +51,10 @@ public:
 
   virtual void startup(void) {};
   virtual void session(pbe::FileDescriptor& in_fd, pbe::FileDescriptor& out_fd) = 0;
+
+protected:
+  virtual void open_socket();
+  virtual void run();
 
 private:
   const short port;
@@ -66,6 +70,7 @@ private:
   typedef pbe::Condition n_sessions_condition_t;
   n_sessions_condition_t n_sessions_condition;
   int n_sessions;
+  int listenfd;
 
 public: // really private
   void decrement_session_count(void);

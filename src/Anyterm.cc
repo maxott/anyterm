@@ -145,7 +145,15 @@ static Anyterm::response_t text_resp(string s)
   return Anyterm::response_t("text/plain; charset=\"UTF-8\"", s);
 }
 
+
 Anyterm::response_t Anyterm::process_request(const HttpRequest& request)
+{
+  // Parse the arguments and call the appropriate function
+  CgiParams params = auto_CgiParams(request);
+  return process_request(params, request.userinfo);
+}
+
+Anyterm::response_t Anyterm::process_request(CgiParams& params, const std::string& userinfo)
 {
   if (!reaper_running) {
     // We can't start the reaper thread from the constructor, because this Anyterm
@@ -154,15 +162,14 @@ Anyterm::response_t Anyterm::process_request(const HttpRequest& request)
     // There's a race condition here if the first two request processing threads start
     // simultaneously.
     reaper_running = true;
-    Thread timed_out_session_reaper 
+    Thread timed_out_session_reaper
       (boost::bind(&Anyterm::run_reaper_thread,this));
   }
 
   // Parse the arguments and call the appropriate function
+  //CgiParams params = auto_CgiParams(request);
 
-  CgiParams params = auto_CgiParams(request);
-
-  try {
+  //try {
 
     string action = params.get("a");
 
@@ -178,13 +185,14 @@ Anyterm::response_t Anyterm::process_request(const HttpRequest& request)
       }
 
       session_ptr_t ses(new Session(params.get_as<int>("rows",25),
-			  	    params.get_as<int>("cols",80),
+              params.get_as<int>("cols",80),
                                     params.get_as<int>("sb",0),
                                     "[host unknown]",
-                                    request.userinfo,
+                                    //request.userinfo,
+                                    userinfo,
                                     params.get("p"),
-				    ANYTERM_TIMEOUT,
-				    activityfactory,
+            ANYTERM_TIMEOUT,
+            activityfactory,
                                     params.get("ch",def_charset),
                                     diff));
       {
@@ -205,30 +213,29 @@ Anyterm::response_t Anyterm::process_request(const HttpRequest& request)
       }
       ses = s->second;
     }
-    
+
     if (action=="rcv") {
       return text_resp(ses->rcv());
-      
+
     } else if (action=="send") {
       string k = params.get("k");
       ses->send(k);
       return text_resp("");
-      
+
     } else if (action=="close") {
       {
         locked_sessions_t::writer sessions_wr(sessions);
         sessions_wr->erase(id);
       }
       return text_resp("");
-      
+
     } else {
-      throw Error("invalid query string '"+request.query+"'");
+      //throw Error("invalid query string '"+request.query+"'");
+      throw Error("unsupported action '" + action + "'");
     }
-  }
-  
-  catch (Error& E) {
-    return text_resp("E"+E.get_msg());
-  }
+  // } catch (Error& E) {
+  //  return text_resp("E"+E.get_msg());
+  //}
 }
 
 

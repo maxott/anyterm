@@ -64,6 +64,7 @@ void AnytermDaemon::handle(const HttpRequest& req0, HttpResponse& resp)
   }
 
   Anyterm::response_t r = anyterm.process_request(req);
+  cout << r.body << endl;
   resp.headers["Content-Type"] = r.type;
   resp.headers["Cache-Control"] = "no-cache, no-store";
   resp.headers["Pragma"] = "no-cache";

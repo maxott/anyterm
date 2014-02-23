@@ -58,8 +58,8 @@ private:
 
 public:
   AnytermDaemon(short port=80, std::string user="",
-		std::string command="",
-		std::string device="",
+    std::string command="",
+    std::string device="",
                 std::string name="",
                 std::string authname="none",
                 std::string charset="ascii",

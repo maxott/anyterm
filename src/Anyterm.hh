@@ -32,7 +32,7 @@
 #include "Session.hh"
 #include "config.hh"
 #include "HttpRequest.hh"
-
+#include "CgiParams.hh"
 
 class Anyterm {
 
@@ -59,6 +59,7 @@ public:
   };
 
   response_t process_request(const pbe::HttpRequest& request);
+  response_t process_request(CgiParams& params, const std::string& userinfo);
 
   void reap_timed_out_sessions(void);
   void run_reaper_thread(void);

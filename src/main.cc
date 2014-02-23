@@ -17,6 +17,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 #include "AnytermDaemon.hh"
+#include "AnytermClientDaemon.hh"
 
 #include <string>
 #include <iostream>
@@ -36,7 +37,7 @@ static void usage()
 {
   cerr << "Usage: anytermd [options]\n"
        << "Available options:\n"
-       << "     --help                     Show this help message\n"
+       << "  -h|--help                     Show this help message\n"
        << "  -c|--command <cmd>            Command to run in terminal (default /bin/bash)\n"
        << "  -d|--device <dev>             Device to connect to (e.g. serial port)\n"
        << "  -p|--port <port>              Port number to listen on (default 8080)\n"
@@ -49,13 +50,16 @@ static void usage()
        << "  -m|--max-sessions             Maximum number of simultaneous sessions (default 20)\n"
        << "     --max-http-connections     Maximum number of simultaneous HTTP connections (default unlimited)\n"
        << "     --local-only               Accept connections only from localhost\n"
-       << "     --name                     Name used for logging and pid file (default anytermd)\n";
+       << "     --name                     Name used for logging and pid file (default anytermd)\n"
+       << "     --server <host> <port>     Actively connect to server to wait for commands - single session\n";
 }
 
 
 struct Options {
   bool background;
+  bool client_mode;
   short port;
+  string host;
   string user;
   string command;
   string device;
@@ -69,6 +73,7 @@ struct Options {
 
   Options():
     background(true),
+    client_mode(false),
     port(8080),
     user(""),
     command("/bin/bash"),
@@ -90,7 +95,7 @@ static Options parse_command_line(int argc, char* argv[])
 
   for (int i=1; i<argc; ++i) {
     string arg = argv[i];
-    if (arg=="-help" || arg=="--help") {
+    if (arg=="-h" ||arg=="-help" || arg=="--help") {
       usage();
       exit(0);
 
@@ -139,6 +144,11 @@ static Options parse_command_line(int argc, char* argv[])
     } else if (arg=="--name") {
       options.name = argv[++i];
 
+    } else if (arg=="--server") {
+      options.host = argv[++i];
+      options.port = boost::lexical_cast<short>(argv[++i]);
+      options.client_mode = true;
+
     } else {
       cerr << "Unrecognised option '" << arg << "'\n";
       exit(1);
@@ -160,15 +170,24 @@ int main(int argc, char* argv[])
     exit(1);
   }
 
-  try { try {
 
-    AnytermDaemon d(options.port, options.user, options.command, options.device, options.name,
-                    options.authname, options.charset, options.diff, options.max_sessions,
-                    options.max_http_connections, options.local_only);
-    d.run_as_daemon(options.background);
-
-  } RETHROW_MISC_EXCEPTIONS }
-  catch (Exception& E) {
+  try {
+    try {
+      if (!options.client_mode) {
+        cout << "NORMAL";
+        AnytermDaemon d(options.port, options.user, options.command, options.device, options.name,
+                        options.authname, options.charset, options.diff, options.max_sessions,
+                        options.max_http_connections, options.local_only);
+        d.run_as_daemon(options.background);
+      } else {
+      /*
+        AnytermClientDaemon d(options.host, options.port, options.user, options.command, options.device, options.name,
+                        options.charset, options.diff);
+        d.run_as_daemon(options.background);
+        */
+      }
+    } RETHROW_MISC_EXCEPTIONS
+  } catch (Exception& E) {
     E.report(cerr);
     exit(E.exit_status);
   }
