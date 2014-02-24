@@ -30,22 +30,24 @@ class AnytermClientDaemon: public Daemon, SessionActivityListener {
 private:
   Anyterm anyterm;
   std::string host;
+  std::string server_ctxt;
   int sockfd;
 
 public:
 
 
-  AnytermClientDaemon(std::string host_, short port_,
+  AnytermClientDaemon(
+    std::string host_, short port_,
     std::string user="",
     std::string command="",
     std::string name="",
     std::string device="",
-                std::string charset="ascii",
-                bool diff=true):
-    host(host_),
-    Daemon(port_, "httpd", LOG_LOCAL0, (name=="") ? "anyterm" : name, "",
-        1, false),
-    anyterm(command, device, charset, diff, 1)
+    std::string charset="ascii",
+    bool diff=true,
+    std::string server_ctxt_ = "undefined"
+  ): Daemon(port_, "httpd", LOG_LOCAL0, (name=="") ? "anyterm" : name, "", 1, false),
+     anyterm(command, device, charset, diff, 1),
+     host(host_), server_ctxt(server_ctxt_)
   {}
 
   void session(pbe::FileDescriptor& in_fd, pbe::FileDescriptor& out_fd) {};
@@ -56,7 +58,7 @@ public:
 protected:
   virtual void open_socket();
   virtual void run();
-  void _write(std::string session_id, std::string msg);
+  void _write(std::string cmd, std::string msg);
 
 };
 

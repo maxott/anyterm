@@ -16,23 +16,19 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-
+#include "version.hh"
 #include "AnytermClientDaemon.hh"
-
 #include "Anyterm.hh"
-#include "static_content.hh"
+#include "segv_backtrace.hh"
+#include "UrlEncodedCgiParams.hh"
 
 #include <sstream>
 #include <algorithm>
-
-#include "segv_backtrace.hh"
-
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h> 
 #include <string> 
 
-#include "UrlEncodedCgiParams.hh"
 
 using namespace std;
 using namespace pbe;
@@ -64,7 +60,9 @@ void AnytermClientDaemon::open_socket() {
 
 void AnytermClientDaemon::run() {
   char buffer[256];
-
+  if (sockfd) {
+    _write("H", server_ctxt + ":V" + ANYTERM_VERSION);
+  }
   while (sockfd) {
     int l = read(sockfd, buffer, 255);
     if (l < 0) {
@@ -87,7 +85,7 @@ void AnytermClientDaemon::run() {
 	    Session* s = anyterm.session(r.body);
 	    s->set_session_activity_listener(this);
 	  }
-	  _write("0", r.body);
+	  _write("S", r.body);
 	  //cout << "SEND: " << r.body << endl;
 	} catch (Exception& E) {
 	  E.report(cerr);
@@ -101,12 +99,12 @@ void AnytermClientDaemon::run() {
 
 void AnytermClientDaemon::on_session_activity(Session* session) {
   std::string r = session->rcv(0.0F);
-  _write(session->id.str(), r);
+  _write("A", session->id.str() + ":" + r);
 }
 
-void AnytermClientDaemon::_write(string session_id, string msg) {
+void AnytermClientDaemon::_write(string cmd, string msg) {
   std::ostringstream ss;
-  ss << "<" << session_id << ":" << msg.length() << ":" << msg << ">";
+  ss << "<" << cmd << ":" << msg.length() << ":" << msg << ">";
   const char* buf = ss.str().c_str();
   int offset = 0;
   int l = strlen(buf);
