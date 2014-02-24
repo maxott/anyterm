@@ -17,11 +17,13 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
+#include <iostream>
 #include "auto_CgiParams.hh"
 
 #include "UrlEncodedCgiParams.hh"
 
 #include <boost/algorithm/string/predicate.hpp>
+
 
 using namespace std;
 using namespace pbe;
@@ -30,8 +32,10 @@ using namespace pbe;
 CgiParams auto_CgiParams(HttpRequest request)
 {
   if (request.method=="GET") {
+    cout << "GET: " << request.query << endl;
     return UrlEncodedCgiParams(request.query);
   } else if (request.method=="POST") {
+    cout << "PUT: " << request.body << endl;
     if (boost::algorithm::starts_with(request.headers["Content-Type"],
                                       "application/x-www-form-urlencoded")) {
       return UrlEncodedCgiParams(request.body);

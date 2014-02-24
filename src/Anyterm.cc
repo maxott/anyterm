@@ -266,3 +266,16 @@ void Anyterm::run_reaper_thread(void)
   }
 }
 
+Session* Anyterm::session(std::string idstr) {
+  SessionId id(idstr);
+  session_ptr_t ses;
+  {
+    locked_sessions_t::reader sessions_rd(sessions);
+    sessions_t::const_iterator s = sessions_rd->find(id);
+    if (s == sessions_rd->end()) {
+      throw Error("no such session '" + idstr +"'");
+    }
+    ses = s->second;
+  }
+  return ses.get();
+}

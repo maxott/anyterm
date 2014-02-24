@@ -39,6 +39,7 @@
 #include "Activity.hh"
 #include "Iconver.hh"
 
+class SessionActivityListener;
 
 class Session: boost::noncopyable {
 public:
@@ -55,6 +56,8 @@ private:
   pbe::Iconver<pbe::permissive,utf8_char,char> utf8_to_charset;
   pbe::Iconver<pbe::permissive,char,ucs4_char> charset_to_ucs4;
   pbe::Iconver<pbe::valid,ucs4_char,utf8_char> ucs4_to_utf8;
+
+  SessionActivityListener* listener;
 
 public:
   Screen screen;
@@ -86,8 +89,9 @@ public:
   void touch(void);
   void report_any_backend_error(void);
   void send(std::string k);
-  std::string rcv(void);
+  std::string rcv(float wait = 10.0F);
 
+  void set_session_activity_listener(SessionActivityListener* l) { listener = l; }
   bool timed_out(void);
 
 private:
@@ -95,5 +99,10 @@ private:
   void process_error(std::string s);
 };
 
+class SessionActivityListener {
+
+public:
+  virtual void on_session_activity(Session* session) = 0;
+};
 
 #endif

@@ -64,6 +64,7 @@ public:
   void reap_timed_out_sessions(void);
   void run_reaper_thread(void);
 
+  Session* session(std::string idstr);
 };
 
 

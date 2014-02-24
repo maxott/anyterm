@@ -64,6 +64,7 @@ Session::Session(int r, int c, int sb,
               host, user, param, r, c))
 {
   dirty=true;
+  listener = NULL;
   touch();
 }
 
@@ -129,12 +130,15 @@ string escape_html(string s)
 }
 
 
-string Session::rcv(void)
+string Session::rcv(float wait)
 {
-  {
-    Lock<screen_lock_t> l(screen_lock);
-    if (!dirty && !error) {
-      dirty_condition.timed_wait(l,10.0F);
+  if (wait > 0.0) {
+    {
+      Lock<screen_lock_t> l(screen_lock);
+      if (!dirty && !error) {
+	//dirty_condition.timed_wait(l,10.0F);
+	dirty_condition.timed_wait(l, wait);
+      }
     }
   }
   touch();
@@ -175,6 +179,9 @@ void Session::process_output(string s)
     term.write(ucs4_s);
     dirty = true;
   }
+  if (listener) {
+    listener->on_session_activity(this);
+  }
   dirty_condition.notify_all();
 }
 
@@ -185,6 +192,9 @@ void Session::process_error(string s)
   // to error is atomic.
   error_msg = s;
   error = true;
+  if (listener) {
+    listener->on_session_activity(this);
+  }
   dirty_condition.notify_all();
 }
 

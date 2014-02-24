@@ -21,14 +21,16 @@
 #define AnytermClientDaemon_hh
 
 #include "Daemon.hh"
+#include "Session.hh"
 #include "Anyterm.hh"
 
 
 
-class AnytermClientDaemon: public Daemon {
+class AnytermClientDaemon: public Daemon, SessionActivityListener {
 private:
   Anyterm anyterm;
   std::string host;
+  int sockfd;
 
 public:
 
@@ -47,10 +49,14 @@ public:
   {}
 
   void session(pbe::FileDescriptor& in_fd, pbe::FileDescriptor& out_fd) {};
+  void run_writer_thread(void);
+
+  void on_session_activity(Session* session);
 
 protected:
   virtual void open_socket();
   virtual void run();
+  void _write(std::string session_id, std::string msg);
 
 };
 

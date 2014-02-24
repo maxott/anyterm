@@ -30,22 +30,15 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h> 
+#include <string> 
 
 #include "UrlEncodedCgiParams.hh"
 
 using namespace std;
 using namespace pbe;
 
+
 void AnytermClientDaemon::open_socket() {
-  cout << ">>> CONNECT" << endl;
-}
-
-void AnytermClientDaemon::run() {
-  cout << ">>> RUN" << endl;
-
-  int sockfd, n;
-  char buffer[256];
-
   struct sockaddr_in serv_addr;
   struct hostent *server;
 
@@ -55,8 +48,8 @@ void AnytermClientDaemon::run() {
   }
   server = gethostbyname(host.c_str());
   if (server == NULL) {
-    cerr << "ERROR, no such host\n";
-    exit(0);
+    cerr << "ERROR, no such host" << endl;
+    exit(-1);
   }
   bzero((char *) &serv_addr, sizeof(serv_addr));
   serv_addr.sin_family = AF_INET;
@@ -64,21 +57,74 @@ void AnytermClientDaemon::run() {
 	(char *)&serv_addr.sin_addr.s_addr,
 	server->h_length);
   serv_addr.sin_port = htons(port);
-  if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
+  if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
     throw_ErrnoException("connect()");
   }
+}
 
-  while (1) {
-    read(sockfd,buffer,255);
-    cout << "Read '" << buffer << "'." << endl;
+void AnytermClientDaemon::run() {
+  char buffer[256];
 
-    CgiParams params = UrlEncodedCgiParams(buffer);
-    Anyterm::response_t r = anyterm.process_request(params, "unknown");
-    cout << "SEND: " << r.body << endl;
+  while (sockfd) {
+    int l = read(sockfd, buffer, 255);
+    if (l < 0) {
+      cerr << "Socket seems to have closed" << endl;
+      sockfd = 0;
+      exit(-1);
+    } else if (l > 0) {
+      buffer[l] = '\0';
+      while (buffer[l - 1] == '\n') {
+	buffer[--l] = '\0';
+      }
+      //cout << "Read " << l << " '" << buffer << "'" << endl;
+      if (l > 0) {
+	try {
+	  CgiParams params = UrlEncodedCgiParams(buffer);
+	  Anyterm::response_t r = anyterm.process_request(params, "unknown");
+	  // This is a bit of a hack
+	  if (params.get("a") == "open") {
+	    // r is supposed to be the session id of a new session. Let's hook up to it
+	    Session* s = anyterm.session(r.body);
+	    s->set_session_activity_listener(this);
+	  }
+	  _write("0", r.body);
+	  //cout << "SEND: " << r.body << endl;
+	} catch (Exception& E) {
+	  E.report(cerr);
+	}
+      }
+    }
   }
 
   close(sockfd);
 }
+
+void AnytermClientDaemon::on_session_activity(Session* session) {
+  std::string r = session->rcv(0.0F);
+  _write(session->id.str(), r);
+}
+
+void AnytermClientDaemon::_write(string session_id, string msg) {
+  std::ostringstream ss;
+  ss << "<" << session_id << ":" << msg.length() << ":" << msg << ">";
+  const char* buf = ss.str().c_str();
+  int offset = 0;
+  int l = strlen(buf);
+  int rm = 0;
+  while ((rm = l - offset) > 0) {
+    int s = write(sockfd, buf, rm);
+    //cout << "Sent " << s << " bytes." << endl;
+    if (s < 0) {
+      cerr << "Socket seems to have closed" << endl;
+      sockfd = 0;
+      exit(-1);
+    }
+    offset += s;
+  }
+  //cout << "ACTIVITY: <<" << buf << ">>" << endl;
+};
+
+
 
 
 //void AnytermClientDaemon::handle(const HttpRequest& req0, HttpResponse& resp)
