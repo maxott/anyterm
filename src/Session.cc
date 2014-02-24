@@ -137,7 +137,9 @@ string Session::rcv(float wait)
       Lock<screen_lock_t> l(screen_lock);
       if (!dirty && !error) {
 	//dirty_condition.timed_wait(l,10.0F);
+	cout << "BEFORE WAIT: " << wait << endl;
 	dirty_condition.timed_wait(l, wait);
+	cout << "AFTER WAIT: " << wait << endl;
       }
     }
   }

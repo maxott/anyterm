@@ -51,7 +51,8 @@ static void usage()
        << "     --max-http-connections     Maximum number of simultaneous HTTP connections (default unlimited)\n"
        << "     --local-only               Accept connections only from localhost\n"
        << "     --name                     Name used for logging and pid file (default anytermd)\n"
-       << "     --server <host> <port>     Actively connect to server to wait for commands - single session\n";
+       << "     --server <host>            Actively connect to server to wait for commands - single session\n"
+       << "     --server-ctxt <ctxt>       String to send with HELLO message to server\n";
 }
 
 
@@ -70,6 +71,7 @@ struct Options {
   int max_http_connections;
   bool local_only;
   string name;
+  string server_ctxt;
 
   Options():
     background(true),
@@ -84,7 +86,8 @@ struct Options {
     max_sessions(20),
     max_http_connections(0),
     local_only(false),
-    name("anytermd")
+    name("anytermd"),
+    server_ctxt("undefined")
   {}
 };
 
@@ -147,7 +150,8 @@ static Options parse_command_line(int argc, char* argv[])
     } else if (arg=="--server") {
       options.host = argv[++i];
       options.client_mode = true;
-
+    } else if (arg=="--server-ctxt") {
+      options.server_ctxt = argv[++i];
     } else {
       cerr << "Unrecognised option '" << arg << "'\n";
       exit(1);
@@ -180,7 +184,7 @@ int main(int argc, char* argv[])
         d.run_as_daemon(options.background);
       } else {
         AnytermClientDaemon d(options.host, options.port, options.user, options.command, options.name, options.device,
-                        options.charset, options.diff);
+			      options.charset, options.diff, options.server_ctxt);
         d.run_as_daemon(options.background);
       }
     } RETHROW_MISC_EXCEPTIONS
