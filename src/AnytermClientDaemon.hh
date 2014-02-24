@@ -46,19 +46,20 @@ public:
     bool diff=true,
     std::string server_ctxt_ = "undefined"
   ): Daemon(port_, "httpd", LOG_LOCAL0, (name=="") ? "anyterm" : name, "", 1, false),
-     anyterm(command, device, charset, diff, 1),
+     anyterm(command, device, charset, diff, 20, 10, true),
      host(host_), server_ctxt(server_ctxt_)
   {}
 
   void session(pbe::FileDescriptor& in_fd, pbe::FileDescriptor& out_fd) {};
   void run_writer_thread(void);
 
-  void on_session_activity(Session* session);
+  void on_session_activity(Session* session, SessionActivity activity);
 
 protected:
   virtual void open_socket();
   virtual void run();
   void _write(std::string cmd, std::string msg);
+  void pinger(void);
 
 };
 

@@ -46,11 +46,13 @@ private:
   locked_sessions_t sessions;
   Session::activityfactory_t activityfactory;
   bool reaper_running;
+  bool use_reaper;
+  int session_timeout;
 
 public:
 
   Anyterm(std::string command, std::string device, std::string charset, bool diff,
-          int max_sessions_);
+          int max_sessions_, int session_timeout_ = ANYTERM_TIMEOUT, bool use_reaper_ = true);
 
   struct response_t {
     std::string type;

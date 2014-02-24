@@ -70,7 +70,12 @@ Session::Session(int r, int c, int sb,
 
 
 Session::~Session()
-{}
+{
+  //cout << "Session destroyed" << endl;
+  if (listener) {
+    listener->on_session_activity(this, CLOSED);
+  }
+}
 
 
 // Timeout unused sessions:
@@ -137,9 +142,7 @@ string Session::rcv(float wait)
       Lock<screen_lock_t> l(screen_lock);
       if (!dirty && !error) {
 	//dirty_condition.timed_wait(l,10.0F);
-	cout << "BEFORE WAIT: " << wait << endl;
 	dirty_condition.timed_wait(l, wait);
-	cout << "AFTER WAIT: " << wait << endl;
       }
     }
   }
@@ -182,7 +185,7 @@ void Session::process_output(string s)
     dirty = true;
   }
   if (listener) {
-    listener->on_session_activity(this);
+    listener->on_session_activity(this, CHANGED);
   }
   dirty_condition.notify_all();
 }
@@ -195,7 +198,7 @@ void Session::process_error(string s)
   error_msg = s;
   error = true;
   if (listener) {
-    listener->on_session_activity(this);
+    listener->on_session_activity(this, CHANGED);
   }
   dirty_condition.notify_all();
 }
@@ -205,4 +208,3 @@ bool Session::timed_out(void)
 {
   return time(NULL) - last_access > time_out;
 }
-

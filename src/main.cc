@@ -18,6 +18,7 @@
 
 #include "AnytermDaemon.hh"
 #include "AnytermClientDaemon.hh"
+#include "version.hh"
 
 #include <string>
 #include <iostream>
@@ -175,9 +176,9 @@ int main(int argc, char* argv[])
 
 
   try {
+    cout << "Anytermd V" << ANYTERM_VERSION << endl;
     try {
       if (!options.client_mode) {
-        cout << "NORMAL";
         AnytermDaemon d(options.port, options.user, options.command, options.device, options.name,
                         options.authname, options.charset, options.diff, options.max_sessions,
                         options.max_http_connections, options.local_only);

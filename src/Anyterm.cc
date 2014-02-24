@@ -105,11 +105,13 @@ static void install_sigchld_handler(void)
 
 
 Anyterm::Anyterm(std::string command, std::string device, std::string charset, bool diff_,
-                 int max_sessions_):
+                 int max_sessions_, int session_timeout_, bool use_reaper_):
   def_charset(charset),
   diff(diff_),
   max_sessions(max_sessions_),
-  reaper_running(false)
+  reaper_running(false),
+  use_reaper(use_reaper_),
+  session_timeout(session_timeout_)
 {
   if (command!="") {
     activityfactory=SubProcessFactory(command);
@@ -155,7 +157,7 @@ Anyterm::response_t Anyterm::process_request(const HttpRequest& request)
 
 Anyterm::response_t Anyterm::process_request(CgiParams& params, const std::string& userinfo)
 {
-  if (!reaper_running) {
+  if (use_reaper && !reaper_running) {
     // We can't start the reaper thread from the constructor, because this Anyterm
     // object is constructed before the daemon forks itself into the background; child
     // threads don't survive the fork.  So we do it on the first call to process_request.
@@ -193,8 +195,8 @@ Anyterm::response_t Anyterm::process_request(CgiParams& params, const std::strin
                                     //request.userinfo,
                                     userinfo,
                                     params.get("p"),
-            ANYTERM_TIMEOUT,
-            activityfactory,
+				    session_timeout,
+				    activityfactory,
                                     ch,
                                     diff));
       {

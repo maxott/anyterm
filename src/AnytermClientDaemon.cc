@@ -28,6 +28,8 @@
 #include <netinet/in.h>
 #include <netdb.h> 
 #include <string> 
+#include <boost/bind.hpp>
+
 
 
 using namespace std;
@@ -59,10 +61,13 @@ void AnytermClientDaemon::open_socket() {
 }
 
 void AnytermClientDaemon::run() {
+  if (!sockfd) return; // should have never gotten here
+
   char buffer[256];
-  if (sockfd) {
-    _write("H", server_ctxt + ":V" + ANYTERM_VERSION);
-  }
+  _write("H", server_ctxt + ":V" + ANYTERM_VERSION);
+
+  Thread pinger(boost::bind(&AnytermClientDaemon::pinger,this));
+
   while (sockfd) {
     int l = read(sockfd, buffer, 255);
     if (l < 0) {
@@ -89,6 +94,10 @@ void AnytermClientDaemon::run() {
 	  //cout << "SEND: " << r.body << endl;
 	} catch (Exception& E) {
 	  E.report(cerr);
+	} catch (const std::exception& ex) {
+	  cerr << ex.what();
+	} catch (...) {
+	  cerr << "Caught some unknown exception";
 	}
       }
     }
@@ -97,9 +106,17 @@ void AnytermClientDaemon::run() {
   close(sockfd);
 }
 
-void AnytermClientDaemon::on_session_activity(Session* session) {
-  std::string r = session->rcv(0.0F);
-  _write("A", session->id.str() + ":" + r);
+void AnytermClientDaemon::on_session_activity(Session* session, SessionActivity activity) {
+  switch(activity) {
+  case CHANGED: {
+    std::string r = session->rcv(0.0F);
+    _write("A", session->id.str() + ":" + r);
+    break;
+  }
+  case CLOSED:
+    _write("C", session->id.str());
+    break;
+  }
 }
 
 void AnytermClientDaemon::_write(string cmd, string msg) {
@@ -121,6 +138,14 @@ void AnytermClientDaemon::_write(string cmd, string msg) {
   }
   //cout << "ACTIVITY: <<" << buf << ">>" << endl;
 };
+
+void AnytermClientDaemon::pinger(void)
+{
+  while (sockfd) {
+    sleep(30);
+    _write("P", server_ctxt);
+  }
+}
 
 
 

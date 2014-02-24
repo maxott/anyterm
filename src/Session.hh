@@ -99,10 +99,15 @@ private:
   void process_error(std::string s);
 };
 
+typedef enum {
+  CHANGED,
+  CLOSED
+} SessionActivity;
+
 class SessionActivityListener {
 
 public:
-  virtual void on_session_activity(Session* session) = 0;
+  virtual void on_session_activity(Session* session, SessionActivity activity) = 0;
 };
 
 #endif
