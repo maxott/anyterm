@@ -184,16 +184,18 @@ Anyterm::response_t Anyterm::process_request(CgiParams& params, const std::strin
         }
       }
 
-      session_ptr_t ses(new Session(params.get_as<int>("rows",25),
-              params.get_as<int>("cols",80),
-                                    params.get_as<int>("sb",0),
+      int rows = params.get_as<int>("rows",25);
+      int cols = params.get_as<int>("cols",80);
+      int sb = params.get_as<int>("sb",0);
+      string ch = params.get("ch",def_charset);
+      session_ptr_t ses(new Session(rows, cols, sb,
                                     "[host unknown]",
                                     //request.userinfo,
                                     userinfo,
                                     params.get("p"),
             ANYTERM_TIMEOUT,
             activityfactory,
-                                    params.get("ch",def_charset),
+                                    ch,
                                     diff));
       {
         locked_sessions_t::writer sessions_wr(sessions);
