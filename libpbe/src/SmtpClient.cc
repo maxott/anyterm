@@ -22,6 +22,7 @@
 
 #include <syslog.h>
 #include <unistd.h>
+#include <cstdio>
 
 #ifdef __OpenBSD__
 // Is this really needed?

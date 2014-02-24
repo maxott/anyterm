@@ -36,8 +36,8 @@ public:
   AnytermClientDaemon(std::string host_, short port_,
     std::string user="",
     std::string command="",
+    std::string name="",
     std::string device="",
-                std::string name="",
                 std::string charset="ascii",
                 bool diff=true):
     host(host_),

@@ -146,7 +146,6 @@ static Options parse_command_line(int argc, char* argv[])
 
     } else if (arg=="--server") {
       options.host = argv[++i];
-      options.port = boost::lexical_cast<short>(argv[++i]);
       options.client_mode = true;
 
     } else {
@@ -180,11 +179,9 @@ int main(int argc, char* argv[])
                         options.max_http_connections, options.local_only);
         d.run_as_daemon(options.background);
       } else {
-      /*
-        AnytermClientDaemon d(options.host, options.port, options.user, options.command, options.device, options.name,
+        AnytermClientDaemon d(options.host, options.port, options.user, options.command, options.name, options.device,
                         options.charset, options.diff);
         d.run_as_daemon(options.background);
-        */
       }
     } RETHROW_MISC_EXCEPTIONS
   } catch (Exception& E) {

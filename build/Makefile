@@ -24,8 +24,8 @@
 # all of the work.
 
 
-DEBUG_FLAGS=
-OPTIMISE_FLAGS=-O
+DEBUG_FLAGS=-g
+OPTIMISE_FLAGS=#-O
 
 include ../common.mk
 

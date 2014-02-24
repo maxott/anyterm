@@ -69,9 +69,9 @@ DEPENDS=$(addsuffix .d,$(notdir $(basename $(CC_SRCS))))
 
 WARN_FLAGS=-W -Wall
 
-OPTIMISE_FLAGS=-O
+OPTIMISE_FLAGS=#-O
 
-DEBUG_FLAGS=
+DEBUG_FLAGS=-g
 
 ifdef ENABLE_POSTGRESQL
   PG_INC_FLAGS=-I$(shell pg_config --includedir)
