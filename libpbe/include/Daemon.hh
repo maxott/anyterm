@@ -56,7 +56,7 @@ protected:
   virtual void open_socket();
   virtual void run();
 
-private:
+protected:
   const short port;
   const std::string progname;
   const int syslog_facility;
@@ -65,6 +65,7 @@ private:
   const int max_sessions;
   const bool accept_local_only;
 
+private:
   typedef pbe::Mutex<> n_sessions_mutex_t;
   n_sessions_mutex_t n_sessions_mutex;
   typedef pbe::Condition n_sessions_condition_t;

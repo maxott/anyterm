@@ -1,3 +1,5 @@
+include
+include-local
 build/*.o
 build/*.d
 libpbe/build/*.o

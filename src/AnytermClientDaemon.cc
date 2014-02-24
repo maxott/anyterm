@@ -27,6 +27,11 @@
 
 #include "segv_backtrace.hh"
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h> 
+
+#include "UrlEncodedCgiParams.hh"
 
 using namespace std;
 using namespace pbe;
@@ -37,6 +42,42 @@ void AnytermClientDaemon::open_socket() {
 
 void AnytermClientDaemon::run() {
   cout << ">>> RUN" << endl;
+
+  int sockfd, n;
+  char buffer[256];
+
+  struct sockaddr_in serv_addr;
+  struct hostent *server;
+
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (sockfd < 0) {
+    throw_ErrnoException("socket()");
+  }
+  server = gethostbyname(host.c_str());
+  if (server == NULL) {
+    cerr << "ERROR, no such host\n";
+    exit(0);
+  }
+  bzero((char *) &serv_addr, sizeof(serv_addr));
+  serv_addr.sin_family = AF_INET;
+  bcopy((char *)server->h_addr,
+	(char *)&serv_addr.sin_addr.s_addr,
+	server->h_length);
+  serv_addr.sin_port = htons(port);
+  if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
+    throw_ErrnoException("connect()");
+  }
+
+  while (1) {
+    read(sockfd,buffer,255);
+    cout << "Read '" << buffer << "'." << endl;
+
+    CgiParams params = UrlEncodedCgiParams(buffer);
+    Anyterm::response_t r = anyterm.process_request(params, "unknown");
+    cout << "SEND: " << r.body << endl;
+  }
+
+  close(sockfd);
 }
 
 
