@@ -53,7 +53,9 @@ static void usage()
        << "     --local-only               Accept connections only from localhost\n"
        << "     --name                     Name used for logging and pid file (default anytermd)\n"
        << "     --server <host>            Actively connect to server to wait for commands - single session\n"
-       << "     --server-ctxt <ctxt>       String to send with HELLO message to server\n";
+       << "     --server-ctxt <ctxt>       String to send with HELLO message to server\n"
+       << "     --session-timeout <sec>    Time after which to reclaim inactive session\n"
+;
 }
 
 
@@ -73,6 +75,7 @@ struct Options {
   bool local_only;
   string name;
   string server_ctxt;
+  int session_timeout;
 
   Options():
     background(true),
@@ -88,7 +91,8 @@ struct Options {
     max_http_connections(0),
     local_only(false),
     name("anytermd"),
-    server_ctxt("undefined")
+    server_ctxt("undefined"),
+    session_timeout(60)
   {}
 };
 
@@ -153,6 +157,8 @@ static Options parse_command_line(int argc, char* argv[])
       options.client_mode = true;
     } else if (arg=="--server-ctxt") {
       options.server_ctxt = argv[++i];
+    } else if (arg=="--session-timeout") {
+      options.session_timeout = boost::lexical_cast<int>(argv[++i]);
     } else {
       cerr << "Unrecognised option '" << arg << "'\n";
       exit(1);
@@ -185,7 +191,7 @@ int main(int argc, char* argv[])
         d.run_as_daemon(options.background);
       } else {
         AnytermClientDaemon d(options.host, options.port, options.user, options.command, options.name, options.device,
-			      options.charset, options.diff, options.server_ctxt);
+			      options.charset, options.diff, options.server_ctxt, options.session_timeout);
         d.run_as_daemon(options.background);
       }
     } RETHROW_MISC_EXCEPTIONS

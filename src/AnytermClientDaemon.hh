@@ -49,8 +49,8 @@ public:
     std::string server_ctxt_ = "undefined",
     int session_timeout = 60
   ): Daemon(port_, "httpd", LOG_LOCAL0, (name=="") ? "anyterm" : name, "", 1, false),
-     //anyterm(command, device, charset, diff, 20, session_timeout, 1),
-     anyterm(command, device, charset, diff, 20, 10, true),
+     anyterm(command, device, charset, diff, 20, session_timeout, true),
+     //anyterm(command, device, charset, diff, 20, 10, true),
      host(host_), server_ctxt(server_ctxt_)
   {}
 

@@ -222,6 +222,6 @@ void Session::process_error(string s)
 
 bool Session::timed_out(void)
 {
-  cout << "UNTOUCHED: " <<  (time(NULL) - last_access) << endl;
+  //cout << "UNTOUCHED: " <<  (time(NULL) - last_access) << endl;
   return time(NULL) - last_access > time_out;
 }
