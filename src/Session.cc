@@ -175,6 +175,22 @@ string Session::rcv(float wait)
   return utf8_editscript;
 }
 
+string Session::refresh()
+{
+  touch();
+
+  ucs4_string html_screen;
+  {
+    Lock<screen_lock_t> l(screen_lock);
+    html_screen = htmlify_screen(screen);
+  }
+
+  string utf8_editscript;
+  utf8_editscript = "R";
+  utf8_editscript.append(ucs4_to_utf8(html_screen));
+  return utf8_editscript;
+}
+
 
 void Session::process_output(string s)
 {

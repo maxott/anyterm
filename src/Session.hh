@@ -90,6 +90,7 @@ public:
   void report_any_backend_error(void);
   void send(std::string k);
   std::string rcv(float wait = 10.0F);
+  std::string refresh();
 
   void set_session_activity_listener(SessionActivityListener* l) { listener = l; }
   bool timed_out(void);
