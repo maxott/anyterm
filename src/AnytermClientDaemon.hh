@@ -23,8 +23,8 @@
 #include "Daemon.hh"
 #include "Session.hh"
 #include "Anyterm.hh"
-
-
+#include "Mutex.hh"
+#include "Condition.hh"
 
 class AnytermClientDaemon: public Daemon, SessionActivityListener {
 private:
@@ -32,6 +32,8 @@ private:
   std::string host;
   std::string server_ctxt;
   int sockfd;
+  typedef pbe::Mutex<> write_lock_t;
+  write_lock_t write_lock;
 
 public:
 

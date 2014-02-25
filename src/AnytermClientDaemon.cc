@@ -131,21 +131,25 @@ void AnytermClientDaemon::on_session_activity(Session* session, SessionActivity 
 }
 
 void AnytermClientDaemon::_write(string cmd, string msg) {
-  std::ostringstream ss;
-  ss << "<" << cmd << ":" << msg.length() << ":" << msg << ">";
-  const char* buf = ss.str().c_str();
-  int offset = 0;
-  int l = strlen(buf);
-  int rm = 0;
-  while ((rm = l - offset) > 0) {
-    int s = write(sockfd, buf, rm);
-    //cout << "Sent " << s << " bytes." << endl;
-    if (s < 0) {
-      cerr << "Socket seems to have closed" << endl;
-      sockfd = 0;
-      exit(-1);
+  {
+    Lock<write_lock_t> lock(write_lock);
+
+    std::ostringstream ss;
+    ss << "<" << cmd << ":" << msg.length() << ":" << msg << ">";
+    const char* buf = ss.str().c_str();
+    int offset = 0;
+    int l = strlen(buf);
+    int rm = 0;
+    while ((rm = l - offset) > 0) {
+      int s = write(sockfd, buf, rm);
+      //cout << "Sent " << s << " bytes." << endl;
+      if (s < 0) {
+	cerr << "Socket seems to have closed" << endl;
+	sockfd = 0;
+	exit(-1);
+      }
+      offset += s;
     }
-    offset += s;
   }
   //cout << "ACTIVITY: <<" << buf << ">>" << endl;
 };
