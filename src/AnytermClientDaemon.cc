@@ -109,8 +109,14 @@ void AnytermClientDaemon::run() {
 void AnytermClientDaemon::on_session_activity(Session* session, SessionActivity activity) {
   switch(activity) {
   case CHANGED: {
-    std::string r = session->rcv(0.0F);
-    _write("A", session->id.str() + ":" + r);
+    try {
+      std::string r = session->rcv(0.0F);
+      _write("A", session->id.str() + ":" + r);
+    } catch (Exception& E) {
+      E.report(cerr);
+    } catch (...) {
+      cerr << "Caught some unknown exception";
+    }
     break;
   }
   case CLOSED:
@@ -142,7 +148,7 @@ void AnytermClientDaemon::_write(string cmd, string msg) {
 void AnytermClientDaemon::pinger(void)
 {
   while (sockfd) {
-    sleep(30);
+    sleep(60);
     _write("P", server_ctxt);
   }
 }
