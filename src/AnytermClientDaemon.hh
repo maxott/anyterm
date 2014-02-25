@@ -44,9 +44,10 @@ public:
     std::string device="",
     std::string charset="ascii",
     bool diff=true,
-    std::string server_ctxt_ = "undefined"
+    std::string server_ctxt_ = "undefined",
+    int session_timeout = 120
   ): Daemon(port_, "httpd", LOG_LOCAL0, (name=="") ? "anyterm" : name, "", 1, false),
-     anyterm(command, device, charset, diff, 20, 10, false),
+     anyterm(command, device, charset, diff, 20, session_timeout, false),
      host(host_), server_ctxt(server_ctxt_)
   {}
 
