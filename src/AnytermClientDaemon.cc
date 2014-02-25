@@ -96,7 +96,7 @@ void AnytermClientDaemon::run() {
 	} catch (Exception& E) {
 	  E.report(cerr);
 	} catch (Error& E) {
-	  cerr << E.get_msg();
+	  _write("E", ":" + E.get_msg());
 	} catch (...) {
 	  cerr << "Caught some unknown exception";
 	}
@@ -126,7 +126,7 @@ void AnytermClientDaemon::on_session_activity(Session* session, SessionActivity 
     _write("C", session->id.str());
     break;
   case ERROR:
-    _write("E", session->id.str() + session->error_msg);
+    _write("E", session->id.str() + ":" + session->error_msg);
   }
 }
 
