@@ -222,7 +222,7 @@ Anyterm::response_t Anyterm::process_request(CgiParams& params, const std::strin
     if (action=="rcv") {
       return text_resp(ses->rcv());
 
-    if (action=="refresh") {
+    } else if (action=="refresh") {
       return text_resp(ses->refresh());
 
     } else if (action=="send") {
