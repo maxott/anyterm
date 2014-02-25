@@ -213,7 +213,7 @@ Anyterm::response_t Anyterm::process_request(CgiParams& params, const std::strin
       locked_sessions_t::reader sessions_rd(sessions);
       sessions_t::const_iterator s = sessions_rd->find(id);
       if (s==sessions_rd->end()) {
-	cerr << "no such session '" << idstr << "'" << endl;
+	//cerr << "no such session '" << idstr << "'" << endl;
         throw Error("no such session '"+idstr+"'");
       }
       ses = s->second;
