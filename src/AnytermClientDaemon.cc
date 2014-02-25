@@ -135,7 +135,7 @@ void AnytermClientDaemon::_write(string cmd, string msg) {
     Lock<write_lock_t> lock(write_lock);
 
     std::ostringstream ss;
-    ss << "<" << cmd << ":" << msg.length() << ":" << msg << ">";
+    ss << "|" << cmd << ":" << msg.length() << ":" << msg << "|";
     const char* buf = ss.str().c_str();
     int offset = 0;
     int l = strlen(buf);
