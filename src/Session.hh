@@ -101,6 +101,7 @@ private:
 
 typedef enum {
   CHANGED,
+  ERROR,
   CLOSED
 } SessionActivity;
 

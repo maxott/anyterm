@@ -198,7 +198,7 @@ void Session::process_error(string s)
   error_msg = s;
   error = true;
   if (listener) {
-    listener->on_session_activity(this, CHANGED);
+    listener->on_session_activity(this, ERROR);
   }
   dirty_condition.notify_all();
 }
