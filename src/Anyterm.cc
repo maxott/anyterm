@@ -105,7 +105,7 @@ static void install_sigchld_handler(void)
 
 
 Anyterm::Anyterm(std::string command, std::string device, std::string charset, bool diff_,
-                 int max_sessions_, int session_timeout_, bool use_reaper_):
+          int max_sessions_, int session_timeout_, bool use_reaper_):
   def_charset(charset),
   diff(diff_),
   max_sessions(max_sessions_),
@@ -113,6 +113,8 @@ Anyterm::Anyterm(std::string command, std::string device, std::string charset, b
   use_reaper(use_reaper_),
   session_timeout(session_timeout_)
 {
+  cout << "CON Use reaper: " << max_sessions_ << session_timeout_ << "   " <<  use_reaper_ << endl;
+
   if (command!="") {
     activityfactory=SubProcessFactory(command);
   } else if (device!="") {
@@ -157,6 +159,7 @@ Anyterm::response_t Anyterm::process_request(const HttpRequest& request)
 
 Anyterm::response_t Anyterm::process_request(CgiParams& params, const std::string& userinfo)
 {
+  cout << "Use reaper: " << use_reaper << endl;
   if (use_reaper && !reaper_running) {
     // We can't start the reaper thread from the constructor, because this Anyterm
     // object is constructed before the daemon forks itself into the background; child
@@ -257,7 +260,9 @@ void Anyterm::reap_timed_out_sessions(void)
     sessions_t::iterator next = i; ++next;
     if (i->second->timed_out()) {
       timed_out_sessions.push_back(i->second);
+      cout << "EEEE1" << endl;
       sessions_wr->erase(i);
+      cout << "EEEE2" << endl;
     }
     i = next;
   }
@@ -267,8 +272,21 @@ void Anyterm::reap_timed_out_sessions(void)
 void Anyterm::run_reaper_thread(void)
 {
   while (1) {
-    sleep(30);
-    reap_timed_out_sessions();
+    //    sleep(30);
+    sleep(5);
+    cout << "REAP 1" << endl;
+    try {
+      reap_timed_out_sessions();
+      /*
+    } catch (Exception& E) {
+      E.report(cerr);
+    } catch (Error& E) {
+      cerr << "Error: " << E.get_msg() << endl;
+      */
+    } catch (...) {
+      cerr << "Caught some unknown exception" << endl;
+    }
+    cout << "REAP 2" << endl;
   }
 }
 

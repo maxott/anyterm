@@ -71,10 +71,10 @@ Session::Session(int r, int c, int sb,
 
 Session::~Session()
 {
-  //cout << "Session destroyed" << endl;
   if (listener) {
     listener->on_session_activity(this, CLOSED);
   }
+  //cout << "Session destroyed" << endl;
 }
 
 
@@ -222,5 +222,6 @@ void Session::process_error(string s)
 
 bool Session::timed_out(void)
 {
+  cout << "UNTOUCHED: " <<  (time(NULL) - last_access) << endl;
   return time(NULL) - last_access > time_out;
 }
