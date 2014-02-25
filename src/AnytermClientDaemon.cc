@@ -21,6 +21,7 @@
 #include "Anyterm.hh"
 #include "segv_backtrace.hh"
 #include "UrlEncodedCgiParams.hh"
+#include "Error.hh"
 
 #include <sstream>
 #include <algorithm>
@@ -94,8 +95,8 @@ void AnytermClientDaemon::run() {
 	  //cout << "SEND: " << r.body << endl;
 	} catch (Exception& E) {
 	  E.report(cerr);
-	} catch (const std::exception& ex) {
-	  cerr << ex.what();
+	} catch (Error& E) {
+	  cerr << E.get_msg();
 	} catch (...) {
 	  cerr << "Caught some unknown exception";
 	}
