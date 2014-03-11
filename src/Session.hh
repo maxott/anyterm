@@ -109,7 +109,7 @@ typedef enum {
 class SessionActivityListener {
 
 public:
-  virtual void on_session_activity(Session* session, SessionActivity activity) = 0;
+  virtual void on_session_activity(Session* session, SessionActivity activity, std:string msg) = 0;
 };
 
 #endif

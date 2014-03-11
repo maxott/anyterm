@@ -72,7 +72,7 @@ Session::Session(int r, int c, int sb,
 Session::~Session()
 {
   if (listener) {
-    listener->on_session_activity(this, CLOSED);
+    listener->on_session_activity(this, CLOSED, id.str());
   }
   //cout << "Session destroyed" << endl;
 }
@@ -201,7 +201,7 @@ void Session::process_output(string s)
     dirty = true;
   }
   if (listener) {
-    listener->on_session_activity(this, CHANGED);
+    listener->on_session_activity(this, CHANGED, s);
   }
   dirty_condition.notify_all();
 }
@@ -214,7 +214,7 @@ void Session::process_error(string s)
   error_msg = s;
   error = true;
   if (listener) {
-    listener->on_session_activity(this, ERROR);
+    listener->on_session_activity(this, ERROR, s);
   }
   dirty_condition.notify_all();
 }

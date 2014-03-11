@@ -107,7 +107,7 @@ void AnytermClientDaemon::run() {
   close(sockfd);
 }
 
-void AnytermClientDaemon::on_session_activity(Session* session, SessionActivity activity) {
+void AnytermClientDaemon::on_session_activity(Session* session, SessionActivity activity, string msg) {
   try {
     switch(activity) {
     case CHANGED: {
@@ -116,7 +116,7 @@ void AnytermClientDaemon::on_session_activity(Session* session, SessionActivity 
       break;
     }
     case CLOSED:
-      _write("C", session->id.str());
+      _write("C", msg);
       break;
     case ERROR:
       _write("E", session->id.str() + ":" + session->error_msg);
